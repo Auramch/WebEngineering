@@ -103,7 +103,7 @@ public class PropertiesController : AbstractController
         if (!ModelState.IsValid)
             return BadRequest();
 
-        var prop = new Prop
+        var prop = new Propiety
         {
 
             //TODO: ini parameters
@@ -125,9 +125,41 @@ public class PropertiesController : AbstractController
                 null => NotFound(),
 
                 var prop => await _prop.DeleteAsync(prop).ContinueWith(_ => Ok())
+
             };
 
+  /*.................................................................................................................*/
+
+     [HttpGet("/statistics/{location}")]
+            public async Task<ActionResult<Models.Statistics>> GetPropertyAsync(string location) {
+                await _prop.FindAsync(location) switch
+                {
+                    null => NotFound(),
+                    var prop => Ok(ApiModels.Property.FromDatabase(prop))
+                };
+
+                 Statistics statistics = new Statistics(prop);
+                 return statistics
+
+            }
+
     /*.................................................................................................................*/
+
+ [HttpGet("/properties/active/{location}")]
+    public ActionResult<IAsyncEnumerable<ApiModels.Property>> GetListAsync(
+        [FromQuery] RequestModels.Filter filter
+
+        await _prop.FindAsync(location) switch
+        {
+            null => NotFound(),
+            var prop => Models.IApiQuery<Property>.ApplyAll(_prop.SimpleCollection, filter);
+        };
+
+        return Ok(prop.AsAsyncEnumerable().Select(ApiModels.PropertySummary.FromDatabase));
+    }
+
+
+ /*.................................................................................................................*/
 
     public class RequestModels
     {
