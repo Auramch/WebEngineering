@@ -97,7 +97,7 @@ public class PropertiesController : AbstractController
             return ApiModels.Property.FromDatabase(prop);
         }
 
-    [HttpPost]("/properties/{id}")
+    [HttpPost("/properties/{id}")]
     public async Task<ActionResult<int>> CreateAsync(int id,[FromBody] ApiModels.Property propertyAPI)
     {
         if (!ModelState.IsValid)
@@ -108,7 +108,7 @@ public class PropertiesController : AbstractController
 
             //TODO: ini parameters
         };
-.
+
         //TODO: Update DB
 
         var result = await _prop.CreateAsync(prop);
@@ -139,7 +139,7 @@ public class PropertiesController : AbstractController
                 };
 
                  Statistics statistics = new Statistics(prop);
-                 return statistics
+                 return statistics;
 
             }
 
@@ -147,12 +147,12 @@ public class PropertiesController : AbstractController
 
  [HttpGet("/properties/active/{location}")]
     public ActionResult<IAsyncEnumerable<ApiModels.Property>> GetListAsync(
-        [FromQuery] RequestModels.Filter filter
+        [FromQuery] RequestModels.Filter filter, string location){
 
         await _prop.FindAsync(location) switch
         {
             null => NotFound(),
-            var prop => Models.IApiQuery<Property>.ApplyAll(_prop.SimpleCollection, filter);
+            var prop => Models.IApiQuery<Property>.ApplyAll(_prop.SimpleCollection, filter)
         };
 
         return Ok(prop.AsAsyncEnumerable().Select(ApiModels.PropertySummary.FromDatabase));
