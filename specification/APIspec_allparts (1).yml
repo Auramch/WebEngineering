@@ -1,0 +1,691 @@
+openapi: '3.0.2'
+info:
+  title: Web Engineering Properties API
+  version: '1.0'
+servers:
+  - url: https://api.server.test/v1
+
+
+components:
+  schemas:
+    rentsqm:
+      description: Calculated using rent per month and area in sqm (type = float or double)
+      type: number
+    Stats:
+      description: Descriptive stats calculated for a given city 
+      type: object
+      properties:
+        city: 
+          readOnly: true
+          type: string
+        rentmedian:
+          description: The median rent per sqm in a given city (type = float or double)
+          type: number
+        rentmean:
+          description: The mean rent per sqm in a given city (type = float or double)
+          type: number 
+        rentsd:
+          description: The standard deviation for rent per sqm in a given city (type = float or double)
+          type: number
+        depositmedian:
+          description: The median deposit per sqm in a given city (type = float or double)
+          type: number
+        depositmean:  
+          description: The mean deposit per sqm in a given city (type = float or double)
+          type: number
+        depositsd:
+          description: The standard deviation for deposits per sqm in a given city (type = float or double)
+          type: number
+
+
+    date:
+      type: string
+    oid:
+      type: string
+    Property:
+      type: object
+      properties:
+        id:
+         type: array
+         items:
+          $ref: "#/components/schemas/oid"
+        externalId: 
+          type: string
+        locations:
+          type: object
+          properties: 
+            city:
+              type: string
+            latitude:
+              type: string
+            longitude:
+              type: string
+            postalCode:
+              type: string
+        roomInfo:
+          type: object
+          properties:
+            areaRaw: 
+              type: string
+            areaSqm:
+              type: integer
+            furnish:
+              type: string
+            propertyType:
+              type: string
+            energyLabel: 
+              type: string     
+        costs:
+          type: object
+          properties:
+            rent:
+              type: integer
+            rentDetail:
+              type: string
+            rentRaw:
+              type: string
+            additionalCosts:
+              type: integer
+            additionalCostsRaw:
+              type: string
+            deposit:
+              type: integer
+            depositRaw:
+              type: string             
+        rawAvailability:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+        translates:
+          type: object
+          properties:  
+            descriptionNonTranslated:
+             type: string
+            descriptionNonTranslatedRaw:
+             type: string
+            descriptionTranslated:
+             type: string
+            descriptionTranslatedRaw:
+             type: string
+        gender:
+          type: string
+        commodities:
+          type: object
+          properties:  
+            internet:
+              type: string
+            kitchen:
+              type: string
+            living:
+              type: string
+            shower:
+              type: string
+            toilet:
+              type: string        
+        isRoomActive:
+          type: string
+        matches: 
+          type: object
+          properties:
+            matchAge:
+              type: string
+            matchAgeBackup:
+              type: string
+            matchCapacity:
+              type: string
+            matchGender:
+              type: string
+            matchGenderBackup:
+              type: string
+            matchLanguages:
+              type: string
+            matchStatus:
+              type: string
+            matchStatusBackup:
+              type: string
+        pageDetails:
+          type: object
+          properties:      
+            pageDescription:
+              type: string
+            pageTitle:
+              type: string
+        registration: 
+          type: object 
+          properties: 
+            registrationCost:
+              type: integer
+            registrationCostRaw:
+              type: string
+        roommates:
+          type: string
+        allowances:
+          type: object
+          properties:
+            pets:
+              type: string 
+            smokingInside:
+              type: string
+        postedAgo:
+          type: string
+
+
+    PropertySummary:
+      type: object
+      properties:
+        title:
+          type: string
+          readOnly: true
+        areaRaw:
+          type: string
+        city: 
+          type: string
+        furnish:
+          type: string
+        postedAgo:
+          type: string
+        rawAvailability:
+          type: string
+        rentRaw:
+          type: string                      
+
+    PropertyFilterKeys: 
+      type: string
+      enum:
+        - rental cost 
+        - cost per sqm            
+
+    PropertyMaxMin:
+      type: string
+      enum: 
+        - city
+        - maxValue
+        - minValues
+
+  responses:
+    OK:
+      description: The request is correct and accepted
+      $ref: "#/components/responses/OK"
+    BadRequest:
+      description: Request was not well-formed, see error details
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error-message:
+                type: string
+                description: Error message detailing the problem with the request
+        text/csv:
+          schema:
+            type: object
+            properties:
+              error-message:
+                type: string
+                description: Error message detailing the problem with the request
+
+    Stats:
+      description: The request is correct and accepted
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Stats"
+        text/csv:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Stats"
+
+    NotFound:
+      description: Resource not found
+
+    NoResults:
+      description: List empty; no results
+
+    ServerError:
+      description: Server error; no results, try again later
+
+    Forbidden: 
+      description: The access is denied, the resource is protected
+
+    UnsupportedMediaType:
+      description: The data is in an unsupported media type
+
+    Conflict:
+      description: The resource state is being violated  
+        
+  parameters:
+
+    city:
+      name: city
+      in: query
+      description: The chosen city 
+      schema:
+        type: string
+
+    order-by:
+      name: order-by
+      in: query
+      required: false
+      description: The column to order the result order-by
+      schema:
+        $ref: "#/components/schemas/PropertyFilterKeys"
+
+    order-dir:
+      name: order-dir
+      in: query
+      required: false
+      description: The direction to order the indicated column
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc 
+
+    top-num:
+      name: top-num
+      in: query
+      required: false
+      description: The top number of items to return
+      schema:
+        type: integer
+        default: 10
+
+    min-budget:
+      name: min-budget
+      in: query
+      description: The minimum budget set to filter items
+      schema:
+        type: integer
+
+    max-budget:        
+      name: max-budget
+      in: query
+      description: The maximum budget set to filter items
+      schema:
+        type: integer
+
+
+
+paths:
+  /properties:
+    parameters:
+      - $ref: "#/components/parameters/city"
+    get:
+      tags: 
+        - Properties
+      description: Retrieves a list of properties, possibly sorted by the requested criteria
+      summary: Retrieve a list of properties
+      parameters:
+        - $ref: "#/components/parameters/order-by"
+        - $ref: "#/components/parameters/order-dir"
+        - $ref: "#/components/parameters/top-num"
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: "#/components/schemas/PropertySummary"
+            text/csv:
+              schema:
+                type: array
+                items: 
+                  $ref: "#/components/schemas/PropertySummary"
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '402':
+          $ref: '#/components/responses/Forbidden'  
+
+        '404':
+          $ref:  "#/components/responses/NotFound"
+
+        '5XX': 
+          $ref: '#/components/responses/ServerError'
+  /properties/{location}:
+    parameters:
+      - name: longitude
+        in: path
+        required: true
+        description: The longitude of the property
+        schema:
+          type: string
+      - name: latitude
+        in: path
+        required: true
+        description: The latitude of the property
+        schema:
+          type: string
+    get:
+      tags:
+        - Properties
+      description: Retrieves a list of properties, with the same longitude and latitude
+      summary: Retrieve a list of properties with the same location
+       
+            
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PropertySummary"
+            text/csv:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PropertySummary"
+
+        
+        '400':
+           $ref: '#/components/responses/BadRequest'
+
+        '404':
+          $ref:  "#/components/responses/NotFound"
+
+        '5XX':
+           $ref: '#/components/responses/ServerError'
+    put:
+      tags:
+        - Properties
+      summary: Update a a list of properties with the same location
+      description: Updates the properties with the same location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+             $ref: "#/components/schemas/PropertySummary"
+          text/csv:
+            schema:
+             $ref: "#/components/schemas/PropertySummary"
+      responses:
+        '200':
+          description: "Property updated, returns the new location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PropertySummary"
+            text/csv:
+              schema:
+                $ref: "#/components/schemas/PropertySummary"
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '404':
+          $ref: "#/components/responses/NotFound"
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Properties
+      summary: Delete property/ies based on location
+      description: Deletes all properties with a given longitude and latitude
+      responses:
+        '204':
+          description: Properties deleted successfully
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '404':
+          $ref: "#/components/responses/NotFound"
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'       
+  /properties/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The ID of the property
+        schema:
+          type: string
+    get:
+      tags: 
+        - Properties
+      summary: Retrieves a property by ID
+      description: Retrieve the property identified by the ID(selected)
+      responses:
+        '200':
+          description: OK  
+          $ref: "#/components/responses/OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+            text/csv:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+        '400':
+          description: The request is bad formed
+          $ref: '#/components/responses/BadRequest'
+
+        '404':
+          $ref:  "#/components/responses/NotFound"
+
+        '5XX':
+          description: Problem with the server
+          $ref: '#/components/responses/ServerError'
+        
+        '402':
+          $ref: '#/components/responses/Forbidden'
+
+    put:
+      tags:
+        - Properties
+      summary: Update the property by ID
+      description: Updates the the property identified by the ID with the given information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Property"
+          text/csv:
+            schema:
+              $ref: "#/components/schemas/Property"
+      responses:
+        
+        '201':
+          description: The property successfully updated
+          $ref: "#/components/responses/OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+            text/csv:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '404':
+          $ref: "#/components/responses/NotFound"
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+        
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+        '402':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags:
+        - Properties
+      summary: Creates a new property by ID
+      description: Creates a new property identified by the ID with the given information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Property"
+          text/csv:
+            schema:
+              $ref: "#/components/schemas/Property"
+      responses:
+        '201':
+          description: The property successfully added 
+          $ref: "#/components/responses/OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+            text/csv:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+        '409':
+          description: Property with the same name ID exists
+          $ref: '#/components/responses/Conflict'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: The ID is used by another property
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+        
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+    delete:
+      tags:
+        - Properties
+      summary: Deletes the property by ID
+      description: Deletes the property identified by the ID
+      responses:
+        '200':
+          description: OK  
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+            text/csv:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+        '204':
+          $ref: "#/components/responses/NoResults"
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+        '404':
+          $ref: "#/components/responses/NotFound"
+
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+        
+        '402':
+          $ref: '#/components/responses/Forbidden'       
+  /statistics:  
+    parameters:
+      - name: city
+        in: query
+        required: true
+        description: The chosen city
+        schema:
+          type: string         
+    get:
+      tags: 
+        - Statistics
+      summary: Returns descriptive stats for a given city
+      description: Returns statistics concerning the rental cost and required deposit across all properties in a given city
+      responses:
+        '200':
+          description: OK  
+          $ref: "#/components/responses/Stats"
+
+        '400':
+          description: The request is bad formed
+          $ref: '#/components/responses/BadRequest'
+
+        '404':
+          $ref:  "#/components/responses/NotFound"
+
+        '5XX':
+          description: Problem with the server
+          $ref: '#/components/responses/ServerError'
+
+  /properties/active:
+   get:
+      tags:
+        - Properties
+      summary: Retrieve properties with rentals between min and max
+      description: Retrieve all properties in a city that are active for renting within a rental budget per month
+      parameters:
+        - $ref: "#/components/parameters/city"
+        - $ref: "#/components/parameters/min-budget"
+        - $ref: "#/components/parameters/max-budget"
+
+      responses:
+
+        '200':
+          description: OK  
+          $ref: "#/components/responses/OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+            text/csv:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+        '204':
+          description: Not results found
+          $ref: "#/components/responses/NoResults"
+
+        '400':
+          description: The request is bad formed
+          $ref: '#/components/responses/BadRequest'
+
+        '5XX':
+          description: Problem with the server
+          $ref: '#/components/responses/ServerError'
+        
+        '402':
+          $ref: '#/components/responses/Forbidden'      
+
+         
+           
+
+
+
