@@ -52,9 +52,22 @@ public class PropertiesController : AbstractController
         if (location == null)
             return NotFound();
 
-        //TODO: Update
-
-        //TODO: Update DB
+        
+        prop.PostedAgo = propertyAPI.PostedAgo;
+        prop.Roommates = propertyAPI.Roommates;
+        prop.IsRoomActive= propertyAPI.IsRoomActive;
+        prop.Gender= propertyAPI.Gender;
+        prop.Availabilty= propertyAPI.Availabilty;
+        prop.Url= propertyAPI.Url;
+        prop.budget= propertyAPI.budget;
+        prop.square= propertyAPI.square;
+        prop.Title= propertyAPI.Title;
+        prop.Location= propertyAPI.Location;
+        prop.RoomInfo= propertyAPI.RoomInfo;
+        prop.Costs= propertyAPI.Costs;
+        prop.Description= propertyAPI.Description;
+        prop.Allowances= propertyAPI.Allowances;
+        prop.Commodities=propertyAPI.Commodities;
 
         await _prop.UpdateAsync(prop);
         return ApiModels.Property.FromDatabase(prop);
@@ -90,9 +103,22 @@ public class PropertiesController : AbstractController
             if (id == null)
                 return NotFound();
 
-            //TODO: Update
-
-            //TODO: Update DB
+            
+            prop.PostedAgo = propertyAPI.PostedAgo;
+            prop.Roommates = propertyAPI.Roommates;
+            prop.IsRoomActive= propertyAPI.IsRoomActive;
+            prop.Gender= propertyAPI.Gender;
+            prop.Availabilty= propertyAPI.Availabilty;
+            prop.Url= propertyAPI.Url;
+            prop.budget= propertyAPI.budget;
+            prop.square= propertyAPI.square;
+            prop.Title= propertyAPI.Title;
+            prop.Location= propertyAPI.Location;
+            prop.RoomInfo= propertyAPI.RoomInfo;
+            prop.Costs= propertyAPI.Costs;
+            prop.Description= propertyAPI.Description;
+            prop.Allowances= propertyAPI.Allowances;
+            prop.Commodities=propertyAPI.Commodities;
 
             await _prop.UpdateAsync(prop);
             return ApiModels.Property.FromDatabase(prop);
@@ -107,10 +133,24 @@ public class PropertiesController : AbstractController
         var prop = new Property
         {
 
-            //TODO: ini parameters
+            PostedAgo = propertyAPI.PostedAgo,
+            Roommates = propertyAPI.Roommates,
+            IsRoomActive= propertyAPI.IsRoomActive,
+            Gender= propertyAPI.Gender,
+            Availabilty= propertyAPI.Availabilty,
+            Url= propertyAPI.Url,
+            budget= propertyAPI.budget,
+            square= propertyAPI.square,
+            Title= propertyAPI.Title,
+            Location= propertyAPI.Location,
+            RoomInfo= propertyAPI.RoomInfo,
+            Costs= propertyAPI.Costs,
+            Description= propertyAPI.Description,
+            Allowances= propertyAPI.Allowances,
+            Commodities=propertyAPI.Commodities
         };
 
-        //TODO: Update DB
+        
 
         var result = await _prop.CreateAsync(prop);
         if (!result)
@@ -184,8 +224,7 @@ public class PropertiesController : AbstractController
 
             public IQueryable<Property> Apply(IQueryable<Property> prop)
             {
-                //TODO: check budget variable in Property class
-                if (Budgetmin != null && Budgetmax != null) prop = prop.Where(m => m.budget < Budgetmax && m.budget > Budgetmin);
+                if (Budgetmin != null && Budgetmax != null) prop = prop.Where(m => m.Costs.Rent < Budgetmax && m.Costs.Rent > Budgetmin);
                 return prop;
             }
         }
