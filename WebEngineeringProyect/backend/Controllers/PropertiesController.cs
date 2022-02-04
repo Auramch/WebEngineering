@@ -1,14 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using backend.Models;
-using backend.Repositories;
+using RUG.WebEng.Properties.Models;
+using RUG.WebEng.Properties.Repositories;
 
-namespace backend.Controllers;
+
+namespace RUG.WebEng.Properties.Controllers;
 
 //Call to DB funcions. TODO: check the implementation of this functions
 
 [ApiController]
-[Route("[controller]")]
+[Route("properties")]
 public class PropertiesController : AbstractController
 {
     private readonly PropertyRepository _prop;
@@ -27,14 +28,14 @@ public class PropertiesController : AbstractController
         if (!ModelState.IsValid)
             return BadRequest();
 
-        var prop = Models.IApiQuery<Property>.ApplyAll(_prop.SimpleCollection, filter, order);
+        var prop = Models.IApiQuery<Property>.ApplyAll(_prop.SimpleCollection, filter, order_by);
         return Ok(prop.AsAsyncEnumerable().Select(ApiModels.PropertySummary.FromDatabase));
     }
 
     /*.................................................................................................................*/
 
     [HttpGet("{location}")]
-        public async Task<ActionResult<ApiModels.Property>> GetPropAsync(string location) =>
+        public async Task<ActionResult<ApiModels.Property>> GetPropAsync(int location) =>
             await _prop.FindAsync(location) switch
             {
                 null => NotFound(),
@@ -42,7 +43,7 @@ public class PropertiesController : AbstractController
             };
 
   [HttpPut("{location}")]
-    public async Task<ActionResult<ApiModels.Property>> UpdatePropertyAsync(string location, [FromBody] ApiModels.Property propertyAPI)
+    public async Task<ActionResult<ApiModels.Property>> UpdatePropertyAsync(int location, [FromBody] ApiModels.Property propertyAPI)
     {
         if (!ModelState.IsValid)
             return BadRequest();
@@ -51,16 +52,29 @@ public class PropertiesController : AbstractController
         if (location == null)
             return NotFound();
 
-        //TODO: Update
-
-        //TODO: Update DB
+        
+        prop.PostedAgo = propertyAPI.PostedAgo;
+        prop.Roommates = propertyAPI.Roommates;
+        prop.IsRoomActive= propertyAPI.IsRoomActive;
+        prop.Gender= propertyAPI.Gender;
+        prop.Availabilty= propertyAPI.Availabilty;
+        prop.Url= propertyAPI.Url;
+        prop.budget= propertyAPI.budget;
+        prop.square= propertyAPI.square;
+        prop.Title= propertyAPI.Title;
+        prop.Location= propertyAPI.Location;
+        prop.RoomInfo= propertyAPI.RoomInfo;
+        prop.Costs= propertyAPI.Costs;
+        prop.Description= propertyAPI.Description;
+        prop.Allowances= propertyAPI.Allowances;
+        prop.Commodities=propertyAPI.Commodities;
 
         await _prop.UpdateAsync(prop);
         return ApiModels.Property.FromDatabase(prop);
     }
 
    [HttpDelete("{location}")]
-       public async Task<ActionResult> DeletePropertyAsync(string location) =>
+       public async Task<ActionResult> DeletePropertyAsync(int location) =>
 
            await _prop.FindAsync(location) switch
            {
@@ -80,18 +94,31 @@ public class PropertiesController : AbstractController
 
 
     [HttpPut("/properties/{id}")]
-        public async Task<ActionResult<ApiModels.Property>> UpdatePropertyAsync(int id, [FromBody] ApiModels.Property propertyAPI)
+        public async Task<ActionResult<ApiModels.Property>> UpdatePropertiesAsync(int id, [FromBody] ApiModels.Property propertyAPI)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
 
             var prop= await _prop.FindAsync(id);
-            if (location == null)
+            if (id == null)
                 return NotFound();
 
-            //TODO: Update
-
-            //TODO: Update DB
+            
+            prop.PostedAgo = propertyAPI.PostedAgo;
+            prop.Roommates = propertyAPI.Roommates;
+            prop.IsRoomActive= propertyAPI.IsRoomActive;
+            prop.Gender= propertyAPI.Gender;
+            prop.Availabilty= propertyAPI.Availabilty;
+            prop.Url= propertyAPI.Url;
+            prop.budget= propertyAPI.budget;
+            prop.square= propertyAPI.square;
+            prop.Title= propertyAPI.Title;
+            prop.Location= propertyAPI.Location;
+            prop.RoomInfo= propertyAPI.RoomInfo;
+            prop.Costs= propertyAPI.Costs;
+            prop.Description= propertyAPI.Description;
+            prop.Allowances= propertyAPI.Allowances;
+            prop.Commodities=propertyAPI.Commodities;
 
             await _prop.UpdateAsync(prop);
             return ApiModels.Property.FromDatabase(prop);
@@ -103,13 +130,27 @@ public class PropertiesController : AbstractController
         if (!ModelState.IsValid)
             return BadRequest();
 
-        var prop = new Propiety
+        var prop = new Property
         {
 
-            //TODO: ini parameters
+            PostedAgo = propertyAPI.PostedAgo,
+            Roommates = propertyAPI.Roommates,
+            IsRoomActive= propertyAPI.IsRoomActive,
+            Gender= propertyAPI.Gender,
+            Availabilty= propertyAPI.Availabilty,
+            Url= propertyAPI.Url,
+            budget= propertyAPI.budget,
+            square= propertyAPI.square,
+            Title= propertyAPI.Title,
+            Location= propertyAPI.Location,
+            RoomInfo= propertyAPI.RoomInfo,
+            Costs= propertyAPI.Costs,
+            Description= propertyAPI.Description,
+            Allowances= propertyAPI.Allowances,
+            Commodities=propertyAPI.Commodities
         };
 
-        //TODO: Update DB
+        
 
         var result = await _prop.CreateAsync(prop);
         if (!result)
@@ -119,7 +160,7 @@ public class PropertiesController : AbstractController
     }
 
     [HttpDelete("/properties/{id}")]
-        public async Task<ActionResult> DeletePropertyAsync(int id) =>
+        public async Task<ActionResult> DeletePropertiesAsync(int id) =>
             await _prop.FindAsync(id) switch
             {
                 null => NotFound(),
@@ -130,35 +171,26 @@ public class PropertiesController : AbstractController
 
   /*.................................................................................................................*/
 
-     [HttpGet("/statistics/{location}")]
-            public async Task<ActionResult<Models.Statistics>> GetPropertyAsync(string location) {
-                await _prop.FindAsync(location) switch
-                {
-                    null => NotFound(),
-                    var prop => Ok(ApiModels.Property.FromDatabase(prop))
-                };
-
-                 Statistics statistics = new Statistics(prop);
-                 return statistics;
-
-            }
-
-    /*.................................................................................................................*/
-
- [HttpGet("/properties/active/{location}")]
-    public ActionResult<IAsyncEnumerable<ApiModels.Property>> GetListAsync(
-        [FromQuery] RequestModels.Filter filter, string location){
-
+    [HttpGet("/statistics/{location}")]
+    public async Task<ActionResult<ApiModels.Statistics>> GetPropertiesAsync(int location)=>
         await _prop.FindAsync(location) switch
         {
             null => NotFound(),
-            var prop => Models.IApiQuery<Property>.ApplyAll(_prop.SimpleCollection, filter)
+            var prop => Ok(ApiModels.Property.FromDatabase(prop))
+                    
         };
 
-        return Ok(prop.AsAsyncEnumerable().Select(ApiModels.PropertySummary.FromDatabase));
-    }
+    /*.................................................................................................................*/
 
-
+    [HttpGet("/properties/active/{location}")]
+    public ActionResult<IAsyncEnumerable<ApiModels.Property>> GetListAsync(
+        [FromQuery] RequestModels.Filter filter, int location)
+        {
+            if (!ModelState.IsValid)
+            return BadRequest();
+            var prop = Models.IApiQuery<Property>.ApplyAll(_prop.SimpleCollection, filter);
+            return Ok(prop.AsAsyncEnumerable().Select(ApiModels.PropertySummary.FromDatabase));
+        }
  /*.................................................................................................................*/
 
     public class RequestModels
@@ -192,10 +224,11 @@ public class PropertiesController : AbstractController
 
             public IQueryable<Property> Apply(IQueryable<Property> prop)
             {
-                //TODO: check budget variable in Property class
-                if (Budgetmin != null && Budgetmax != null) prop = prop.Where(m => m.budget < Budgetmax && m.budget > Budgetmin);
+                if (Budgetmin != null && Budgetmax != null) prop = prop.Where(m => m.Costs.Rent < Budgetmax && m.Costs.Rent > Budgetmin);
                 return prop;
             }
         }
     }
 }
+
+
